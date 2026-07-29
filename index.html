@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI早知道 · 每天第一时间看懂 AI 圈</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3340;
+    --txt:#e6edf3; --sub:#9aa7b5; --accent:#ff7a45; --accent2:#58a6ff;
+    --tag:#21262d; --ok:#3fb950;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.6;padding-bottom:60px}
+  header{position:sticky;top:0;z-index:20;background:rgba(13,17,23,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 18px}
+  .title{font-size:22px;font-weight:800;letter-spacing:1px}
+  .title .dot{color:var(--accent)}
+  .subtitle{font-size:12px;color:var(--sub);margin-top:2px}
+  .wrap{max-width:880px;margin:0 auto;padding:18px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .seg button{background:none;border:none;color:var(--sub);padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600}
+  .seg button.active{background:var(--accent);color:#fff}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--panel);border:1px solid var(--border);color:var(--sub);
+    padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer}
+  .chip.active{border-color:var(--accent2);color:var(--accent2)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  input[type=text]{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--border);
+    color:var(--txt);padding:9px 12px;border-radius:9px;font-size:13px;outline:none}
+  input[type=text]:focus{border-color:var(--accent2)}
+  .btn{background:var(--accent);color:#fff;border:none;padding:9px 16px;border-radius:9px;
+    font-size:13px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:var(--panel);color:var(--sub);border:1px solid var(--border)}
+  .meta{font-size:12px;color:var(--sub);margin:6px 2px 16px}
+  .lead{background:linear-gradient(135deg,#21262d,#161b22);border:1px solid var(--border);
+    border-radius:12px;padding:16px;margin-bottom:18px}
+  .lead h2{font-size:17px;margin-bottom:6px}
+  .lead p{font-size:13px;color:var(--sub)}
+  .sec{margin:22px 0 10px;font-size:15px;font-weight:800;color:var(--accent2);
+    border-left:3px solid var(--accent);padding-left:10px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;margin-bottom:12px;transition:.15s}
+  .card:hover{border-color:var(--accent2);transform:translateY(-1px)}
+  .card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .card h3{font-size:15px;font-weight:700;line-height:1.4}
+  .card h3 a{color:var(--txt);text-decoration:none}
+  .card h3 a:hover{color:var(--accent)}
+  .card .src{font-size:12px;color:var(--sub);white-space:nowrap;flex-shrink:0}
+  .card .time{font-size:11px;color:var(--ok);margin:4px 0}
+  .card .sum{font-size:13px;color:var(--sub);margin-top:6px}
+  .flash{font-size:13px;color:var(--sub);padding:6px 0;border-bottom:1px dashed var(--border)}
+  .flash b{color:var(--txt)}
+  .loading{padding:40px;text-align:center;color:var(--sub)}
+  .err{padding:16px;background:#3d1d1d;border:1px solid #ff6b6b;color:#ffb3b3;border-radius:10px}
+  .empty{padding:30px;text-align:center;color:var(--sub)}
+  footer{text-align:center;font-size:11px;color:#5b6573;margin-top:30px}
+  a{color:var(--accent2)}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">AI<span class="dot">早</span>知道</div>
+  <div class="subtitle">每天第一时间看懂 AI 圈 · 数据实时来自公开资讯源</div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="seg" id="modeSeg">
+      <button data-mode="selected" class="active">精选</button>
+      <button data-mode="all">全部</button>
+      <button data-mode="daily">早报</button>
+    </div>
+    <div class="seg" id="winSeg">
+      <button data-win="1" class="active">24h</button>
+      <button data-win="3">3天</button>
+      <button data-win="7">7天</button>
+    </div>
+  </div>
+
+  <div class="chips" id="catChips">
+    <span class="chip active" data-cat="">全部</span>
+    <span class="chip" data-cat="ai-models">模型</span>
+    <span class="chip" data-cat="ai-products">产品</span>
+    <span class="chip" data-cat="industry">行业</span>
+    <span class="chip" data-cat="paper">论文</span>
+    <span class="chip" data-cat="tip">技巧</span>
+  </div>
+
+  <div class="row" style="margin-top:14px">
+    <input type="text" id="q" placeholder="搜索关键词，如 OpenAI / Sora / RAG（至少2字）">
+    <button class="btn" id="go">查询</button>
+    <button class="btn ghost" id="reset">重置</button>
+  </div>
+
+  <div class="meta" id="meta"></div>
+  <div id="out"></div>
+</div>
+
+<footer>AI早知道 · 资讯来自公开聚合源，仅供学习参考</footer>
+
+<script>
+const BASE="https://aihot.virxact.com";
+const CAT_LABEL={ "ai-models":"模型发布/更新","ai-products":"产品发布/更新","industry":"行业动态","paper":"论文研究","tip":"技巧与观点",null:"其他" };
+
+const state={ mode:"selected", win:1, cat:"", q:"" };
+
+// 时间：UTC -> 北京时间 + 相对
+function fmtTime(iso){
+  if(!iso) return "";
+  const d=new Date(iso); if(isNaN(d)) return "";
+  const now=new Date();
+  const diff=(now-d)/1000;
+  if(diff<60) return "刚刚";
+  if(diff<3600) return Math.floor(diff/60)+"分钟前";
+  if(diff<86400) return Math.floor(diff/3600)+"小时前";
+  if(diff<172800) return "昨天";
+  if(diff<604800) return Math.floor(diff/86400)+"天前";
+  return d.toLocaleDateString("zh-CN",{month:"numeric",day:"numeric",timeZone:"Asia/Shanghai"});
+}
+function bjDate(iso){
+  const d=new Date(iso);
+  return d.toLocaleString("zh-CN",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Shanghai"});
+}
+
+function isoSince(days){
+  const d=new Date(Date.now()-days*86400000);
+  return d.toISOString().slice(0,19)+"Z";
+}
+
+function setActive(group,el){
+  group.querySelectorAll("button,span").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+document.getElementById("modeSeg").addEventListener("click",e=>{
+  if(e.target.dataset.mode){ state.mode=e.target.dataset.mode; setActive(e.currentTarget,e.target); render(); }
+});
+document.getElementById("winSeg").addEventListener("click",e=>{
+  if(e.target.dataset.win){ state.win=+e.target.dataset.win; setActive(e.currentTarget,e.target); render(); }
+});
+document.getElementById("catChips").addEventListener("click",e=>{
+  if(e.target.dataset.cat!==undefined){ state.cat=e.target.dataset.cat; setActive(e.currentTarget,e.target); render(); }
+});
+document.getElementById("go").addEventListener("click",()=>{ state.q=document.getElementById("q").value.trim(); render(); });
+document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter"){ state.q=e.target.value.trim(); render(); }});
+document.getElementById("reset").addEventListener("click",()=>{
+  state.q=""; document.getElementById("q").value=""; render();
+});
+
+async function render(){
+  const out=document.getElementById("out");
+  const meta=document.getElementById("meta");
+  out.innerHTML='<div class="loading">加载中…</div>';
+  meta.textContent="";
+  try{
+    if(state.mode==="daily"){ await renderDaily(out,meta); }
+    else { await renderItems(out,meta); }
+  }catch(err){
+    out.innerHTML='<div class="err">加载失败：'+err.message+'</div>';
+  }
+}
+
+async function renderItems(out,meta){
+  let url=`${BASE}/api/public/items?mode=${state.mode}&take=50`;
+  if(state.cat) url+=`&category=${state.cat}`;
+  if(state.q && state.q.length>=2) url+=`&q=${encodeURIComponent(state.q)}`;
+  else if(state.mode!=="all") url+=`&since=${isoSince(state.win)}`;
+
+  const r=await fetch(url);
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const data=await r.json();
+  const items=data.items||[];
+  meta.textContent=`共 ${items.length} 条`+(state.mode!=="all"?` · 时间窗 ${state.win} 天内`:"")+(state.cat?` · ${CAT_LABEL[state.cat]}`:"");
+  if(!items.length){ out.innerHTML='<div class="empty">暂无内容，换个条件试试</div>'; return; }
+
+  // 按分类分组
+  const groups={};
+  items.forEach(it=>{ const c=it.category||null; (groups[c]=groups[c]||[]).push(it); });
+  const order=["ai-models","ai-products","industry","paper","tip",null];
+  let n=0; let html="";
+  order.forEach(c=>{
+    const arr=groups[c]; if(!arr) return;
+    html+=`<div class="sec">${CAT_LABEL[c]||"其他"}（${arr.length}）</div>`;
+    arr.forEach(it=>{
+      n++;
+      const t=fmtTime(it.publishedAt);
+      html+=`<div class="card"><div class="top">
+        <h3><a href="${it.url}" target="_blank" rel="noopener">${n}. ${esc(it.title)}</a></h3>
+        <div class="src">${esc(it.source||"")}</div></div>
+        ${t?`<div class="time">${t}</div>`:""}
+        ${it.summary?`<div class="sum">${esc(it.summary)}</div>`:""}</div>`;
+    });
+  });
+  out.innerHTML=html;
+}
+
+async function renderDaily(out,meta){
+  const r=await fetch(`${BASE}/api/public/daily`);
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const d=await r.json();
+  if(!d.date){ out.innerHTML='<div class="empty">今天的早报还没生成（北京时间 08:00 后）</div>'; return; }
+  let html=`<div class="meta-date">早报日期：${d.date}</div>`;
+  if(d.lead&&d.lead.title){
+    html+=`<div class="lead"><h2>${esc(d.lead.title)}</h2>${d.lead.leadParagraph?`<p>${esc(d.lead.leadParagraph)}</p>`:""}</div>`;
+  }
+  (d.sections||[]).forEach(sec=>{
+    const arr=sec.items||[];
+    html+=`<div class="sec">${esc(sec.label)}（${arr.length}）</div>`;
+    arr.forEach((it,i)=>{
+      html+=`<div class="card"><h3><a href="${it.sourceUrl}" target="_blank" rel="noopener">${esc(it.title)}</a></h3>
+        <div class="src" style="margin-top:4px">${esc(it.sourceName||"")}</div>
+        ${it.summary?`<div class="sum">${esc(it.summary)}</div>`:""}</div>`;
+    });
+  });
+  if(d.flashes&&d.flashes.length){
+    html+=`<div class="sec">快讯</div>`;
+    d.flashes.forEach(f=>{ html+=`<div class="flash"><b>${esc(f.title)}</b> — ${esc(f.sourceName||"")}${f.publishedAt?` · ${bjDate(f.publishedAt)}`:""}</div>`; });
+  }
+  meta.textContent=`AI早知道 · 早报 ${d.date}`;
+  out.innerHTML=html;
+}
+
+function esc(s){ return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+render();
+</script>
+</body>
+</html>
