@@ -3,71 +3,240 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AI早知道 · 每天第一时间看懂AI圈。精选AI模型发布、产品动态、行业资讯、论文研究、技巧观点，自动整理成中文早报。">
 <title>AI早知道 · 每天第一时间看懂 AI 圈</title>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3340;
-    --txt:#e6edf3; --sub:#9aa7b5; --accent:#ff7a45; --accent2:#58a6ff;
-    --tag:#21262d; --ok:#3fb950;
+    --txt:#1a1a1a; --sub:#666; --muted:#999;
+    --blur:18px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
-    background:var(--bg);color:var(--txt);line-height:1.6;padding-bottom:60px}
-  header{position:sticky;top:0;z-index:20;background:rgba(13,17,23,.92);
-    backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 18px}
-  .title{font-size:22px;font-weight:800;letter-spacing:1px}
-  .title .dot{color:var(--accent)}
-  .subtitle{font-size:12px;color:var(--sub);margin-top:2px}
-  .wrap{max-width:880px;margin:0 auto;padding:18px}
-  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-  .seg{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-  .seg button{background:none;border:none;color:var(--sub);padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600}
-  .seg button.active{background:var(--accent);color:#fff}
-  .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{background:var(--panel);border:1px solid var(--border);color:var(--sub);
-    padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer}
-  .chip.active{border-color:var(--accent2);color:var(--accent2)}
-  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
-  input[type=text]{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--border);
-    color:var(--txt);padding:9px 12px;border-radius:9px;font-size:13px;outline:none}
-  input[type=text]:focus{border-color:var(--accent2)}
-  .btn{background:var(--accent);color:#fff;border:none;padding:9px 16px;border-radius:9px;
-    font-size:13px;font-weight:700;cursor:pointer}
-  .btn.ghost{background:var(--panel);color:var(--sub);border:1px solid var(--border)}
-  .meta{font-size:12px;color:var(--sub);margin:6px 2px 16px}
-  .lead{background:linear-gradient(135deg,#21262d,#161b22);border:1px solid var(--border);
-    border-radius:12px;padding:16px;margin-bottom:18px}
-  .lead h2{font-size:17px;margin-bottom:6px}
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    color:var(--txt);line-height:1.6;padding-bottom:60px;
+    min-height:100vh;
+    background:#f5f5f5;
+    background-attachment:fixed;
+  }
+
+  header{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55) 60%, rgba(220,220,220,0.35));
+    backdrop-filter:blur(24px) saturate(1.4);
+    -webkit-backdrop-filter:blur(24px) saturate(1.4);
+    border-bottom:1px solid rgba(0,0,0,0.06);
+    padding:16px 20px;
+  }
+  .title{font-size:22px;font-weight:800;letter-spacing:2px;color:#111}
+  .title .dot{color:#ff7a45}
+  .subtitle{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.5px}
+
+  .wrap{max-width:860px;margin:0 auto;padding:20px 18px;position:relative;z-index:1}
+
+  /* ========== 顶部工具栏 ========== */
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:14px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.5) 50%, rgba(230,230,230,0.3));
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(0,0,0,0.06); border-radius:16px;
+    padding:12px 16px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(0,0,0,0.02),
+      0 4px 20px rgba(0,0,0,0.06);
+  }
+  .toolbar .seg{
+    display:flex;flex:1; gap:2px;
+    background:rgba(0,0,0,0.04); border-radius:10px; padding:3px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(0,0,0,0.05);
+  }
+  .toolbar .seg button{
+    flex:1; background:none;border:none;color:var(--muted);
+    padding:8px 0;font-size:12.5px;cursor:pointer;font-weight:600;
+    border-radius:8px;transition:.2s;letter-spacing:0.5px;
+  }
+  .toolbar .seg button:hover{color:#555}
+  .toolbar .seg button.active{
+    background:rgba(0,0,0,0.06); color:#111;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  /* 早报模式下隐藏时间窗 */
+  .toolbar .seg.hidden{visibility:hidden;pointer-events:none}
+
+  /* ========== 分类 chips ========== */
+  .chips{
+    display:flex; justify-content:space-between; gap:0; margin-bottom:14px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5) 50%, rgba(230,230,230,0.3));
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(0,0,0,0.06); border-radius:14px;
+    padding:8px 10px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(0,0,0,0.02),
+      0 4px 18px rgba(0,0,0,0.05);
+  }
+  .chip{
+    flex:1; text-align:center; background:none; color:var(--muted);
+    padding:7px 0;border-radius:10px;font-size:12px;cursor:pointer;transition:.2s;
+    font-weight:600;letter-spacing:0.5px;
+    border:1px solid transparent;
+  }
+  .chip:hover{color:#555}
+  .chip.active{
+    background:rgba(0,0,0,0.05); color:#111;
+    border:1px solid rgba(0,0,0,0.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(0,0,0,0.04);
+  }
+
+  /* ========== 搜索行 ========== */
+  .search-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:12px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.5) 50%, rgba(230,230,230,0.3));
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(0,0,0,0.06); border-radius:14px;
+    padding:8px 10px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(0,0,0,0.02),
+      0 4px 18px rgba(0,0,0,0.05);
+  }
+  .search-row input{
+    flex:1; background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.06);
+    color:#222; padding:10px 14px;border-radius:10px;font-size:13px;outline:none;transition:.2s;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .search-row input:focus{border-color:rgba(0,0,0,0.15); box-shadow:0 0 16px rgba(0,0,0,0.04)}
+  .search-row input::placeholder{color:rgba(0,0,0,0.2)}
+  .search-row button{
+    flex-shrink:0; min-width:64px; text-align:center;
+    background:rgba(0,0,0,0.04); backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(0,0,0,0.06); color:#555;
+    padding:10px 0;border-radius:10px;font-size:12.5px;font-weight:700;
+    cursor:pointer;transition:.2s;letter-spacing:1px;
+  }
+  .search-row button:hover{background:rgba(0,0,0,0.08);color:#111}
+  .search-row button.primary{background:rgba(0,0,0,0.07);color:#111}
+
+  .meta{font-size:11px;color:var(--muted);margin:6px 2px 16px;letter-spacing:0.5px}
+
+  /* ========== 内容区 ========== */
+  .lead{
+    background:linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55) 50%, rgba(230,230,230,0.35));
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(0,0,0,0.06); border-radius:16px;
+    padding:20px;margin-bottom:18px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(0,0,0,0.02),
+      0 4px 20px rgba(0,0,0,0.04);
+  }
+  .lead h2{font-size:16px;margin-bottom:6px;color:#111;font-weight:700}
   .lead p{font-size:13px;color:var(--sub)}
-  .sec{margin:22px 0 10px;font-size:15px;font-weight:800;color:var(--accent2);
-    border-left:3px solid var(--accent);padding-left:10px}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
-    padding:14px 16px;margin-bottom:12px;transition:.15s}
-  .card:hover{border-color:var(--accent2);transform:translateY(-1px)}
+
+  .sec{
+    margin:28px 0 10px;font-size:12px;font-weight:800;color:#888;
+    letter-spacing:1.5px;text-transform:uppercase;
+    padding:8px 14px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3) 50%, rgba(220,220,220,0.15));
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(0,0,0,0.05); border-radius:10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+
+  .card{
+    background:linear-gradient(135deg, rgba(255,255,255,0.75), rgba(255,255,255,0.4) 50%, rgba(225,225,225,0.25));
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(0,0,0,0.05); border-radius:14px;
+    padding:15px 18px;margin-bottom:10px;transition:.2s;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.8),
+      inset 0 -1px 0 rgba(0,0,0,0.02),
+      0 2px 12px rgba(0,0,0,0.04);
+    position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:""; position:absolute; top:0;left:5%;right:5%;height:1px;
+    background:linear-gradient(90deg,transparent, rgba(255,255,255,0.7), transparent);
+    pointer-events:none;
+  }
+  .card:hover{
+    border-color:rgba(0,0,0,0.12);
+    background:linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6) 50%, rgba(240,240,240,0.4));
+    box-shadow:0 6px 28px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    transform:translateY(-1px);
+  }
   .card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-  .card h3{font-size:15px;font-weight:700;line-height:1.4}
-  .card h3 a{color:var(--txt);text-decoration:none}
-  .card h3 a:hover{color:var(--accent)}
-  .card .src{font-size:12px;color:var(--sub);white-space:nowrap;flex-shrink:0}
-  .card .time{font-size:11px;color:var(--ok);margin:4px 0}
-  .card .sum{font-size:13px;color:var(--sub);margin-top:6px}
-  .flash{font-size:13px;color:var(--sub);padding:6px 0;border-bottom:1px dashed var(--border)}
-  .flash b{color:var(--txt)}
-  .loading{padding:40px;text-align:center;color:var(--sub)}
-  .err{padding:16px;background:#3d1d1d;border:1px solid #ff6b6b;color:#ffb3b3;border-radius:10px}
-  .empty{padding:30px;text-align:center;color:var(--sub)}
-  footer{text-align:center;font-size:11px;color:#5b6573;margin-top:30px}
-  a{color:var(--accent2)}
+  .card h3{font-size:14px;font-weight:700;line-height:1.45;color:#222}
+  .card h3 a{color:inherit;text-decoration:none}
+  .card h3 a:hover{color:#000}
+  .card .src{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:2px}
+  .card .time{font-size:11px;color:#aaa;margin:4px 0}
+  .card .sum{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.55}
+
+  .flash{
+    font-size:12.5px;color:var(--sub);padding:8px 0;
+    border-bottom:1px solid rgba(0,0,0,0.04);
+  }
+  .flash b{color:#222}
+
+  .loading{padding:50px;text-align:center;color:var(--muted);letter-spacing:2px;font-size:13px}
+  .err{
+    padding:16px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.75), rgba(255,255,255,0.4));
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid rgba(0,0,0,0.08);color:#888;border-radius:12px;
+  }
+  .empty{padding:50px;text-align:center;color:var(--muted)}
+
+  /* ========== 回到顶部按钮 ========== */
+  .back-to-top{
+    position:fixed;bottom:30px;right:30px;z-index:30;
+    width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.5));
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(0,0,0,0.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 16px rgba(0,0,0,0.1);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:.25s;opacity:0;transform:translateY(20px);
+    pointer-events:none;
+  }
+  .back-to-top.show{opacity:1;transform:translateY(0);pointer-events:auto}
+  .back-to-top:hover{
+    background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.7));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 22px rgba(0,0,0,0.14);
+    transform:translateY(-2px);
+  }
+  .back-to-top::after{
+    content:"";width:10px;height:10px;border-left:2px solid #888;border-top:2px solid #888;
+    transform:rotate(45deg) translateY(2px);
+  }
+
+  footer{text-align:center;font-size:10px;color:rgba(0,0,0,0.15);margin-top:40px;position:relative;z-index:1;letter-spacing:1px}
+
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,0.15)}
 </style>
 </head>
 <body>
 <header>
   <div class="title">AI<span class="dot">早</span>知道</div>
-  <div class="subtitle">每天第一时间看懂 AI 圈 · 数据实时来自公开资讯源</div>
+  <div class="subtitle">每天第一时间看懂 AI 圈</div>
 </header>
 
 <div class="wrap">
-  <div class="controls">
+
+  <div class="toolbar">
     <div class="seg" id="modeSeg">
       <button data-mode="selected" class="active">精选</button>
       <button data-mode="all">全部</button>
@@ -89,17 +258,20 @@
     <span class="chip" data-cat="tip">技巧</span>
   </div>
 
-  <div class="row" style="margin-top:14px">
-    <input type="text" id="q" placeholder="搜索关键词，如 OpenAI / Sora / RAG（至少2字）">
-    <button class="btn" id="go">查询</button>
-    <button class="btn ghost" id="reset">重置</button>
+  <div class="search-row">
+    <input type="text" id="q" placeholder="搜索关键词，如 OpenAI / Sora / RAG …">
+    <button id="go" class="primary">查询</button>
+    <button id="reset">重置</button>
   </div>
 
   <div class="meta" id="meta"></div>
   <div id="out"></div>
 </div>
 
-<footer>AI早知道 · 资讯来自公开聚合源，仅供学习参考</footer>
+<!-- 回到顶部 -->
+<div class="back-to-top" id="backTop" title="回到顶部"></div>
+
+<footer>AI 早 知 道</footer>
 
 <script>
 const BASE="https://aihot.virxact.com";
@@ -107,7 +279,6 @@ const CAT_LABEL={ "ai-models":"模型发布/更新","ai-products":"产品发布/
 
 const state={ mode:"selected", win:1, cat:"", q:"" };
 
-// 时间：UTC -> 北京时间 + 相对
 function fmtTime(iso){
   if(!iso) return "";
   const d=new Date(iso); if(isNaN(d)) return "";
@@ -135,9 +306,18 @@ function setActive(group,el){
   el.classList.add("active");
 }
 
+// ===== 模式切换：早报时隐藏时间窗 =====
+const winSeg=document.getElementById("winSeg");
 document.getElementById("modeSeg").addEventListener("click",e=>{
-  if(e.target.dataset.mode){ state.mode=e.target.dataset.mode; setActive(e.currentTarget,e.target); render(); }
+  if(!e.target.dataset.mode) return;
+  state.mode=e.target.dataset.mode;
+  setActive(e.currentTarget,e.target);
+  // 3: 早报模式隐藏时间窗按钮
+  if(state.mode==="daily") winSeg.classList.add("hidden");
+  else winSeg.classList.remove("hidden");
+  render();
 });
+
 document.getElementById("winSeg").addEventListener("click",e=>{
   if(e.target.dataset.win){ state.win=+e.target.dataset.win; setActive(e.currentTarget,e.target); render(); }
 });
@@ -148,6 +328,13 @@ document.getElementById("go").addEventListener("click",()=>{ state.q=document.ge
 document.getElementById("q").addEventListener("keydown",e=>{ if(e.key==="Enter"){ state.q=e.target.value.trim(); render(); }});
 document.getElementById("reset").addEventListener("click",()=>{
   state.q=""; document.getElementById("q").value=""; render();
+});
+
+// ===== 回到顶部按钮 =====
+const backTop=document.getElementById("backTop");
+backTop.addEventListener("click",()=>{ window.scrollTo({top:0,behavior:"smooth"}); });
+window.addEventListener("scroll",()=>{
+  backTop.classList.toggle("show",window.scrollY>400);
 });
 
 async function render(){
@@ -164,19 +351,19 @@ async function render(){
 }
 
 async function renderItems(out,meta){
-  let url=`${BASE}/api/public/items?mode=${state.mode}&take=50`;
+  let url=`${BASE}/api/public/items?mode=${state.mode}&take=10`;
   if(state.cat) url+=`&category=${state.cat}`;
-  if(state.q && state.q.length>=2) url+=`&q=${encodeURIComponent(state.q)}`;
+  // 4: 搜索时也带 since 收窄窗口
+  if(state.q && state.q.length>=2) url+=`&q=${encodeURIComponent(state.q)}&since=${isoSince(state.win)}`;
   else if(state.mode!=="all") url+=`&since=${isoSince(state.win)}`;
 
   const r=await fetch(url);
   if(!r.ok) throw new Error("HTTP "+r.status);
   const data=await r.json();
   const items=data.items||[];
-  meta.textContent=`共 ${items.length} 条`+(state.mode!=="all"?` · 时间窗 ${state.win} 天内`:"")+(state.cat?` · ${CAT_LABEL[state.cat]}`:"");
+  meta.textContent=`共 ${items.length} 条`+(state.mode!=="all"||state.q?` · 时间窗 ${state.win} 天内`:"")+(state.cat?` · ${CAT_LABEL[state.cat]}`:"");
   if(!items.length){ out.innerHTML='<div class="empty">暂无内容，换个条件试试</div>'; return; }
 
-  // 按分类分组
   const groups={};
   items.forEach(it=>{ const c=it.category||null; (groups[c]=groups[c]||[]).push(it); });
   const order=["ai-models","ai-products","industry","paper","tip",null];
@@ -202,7 +389,7 @@ async function renderDaily(out,meta){
   if(!r.ok) throw new Error("HTTP "+r.status);
   const d=await r.json();
   if(!d.date){ out.innerHTML='<div class="empty">今天的早报还没生成（北京时间 08:00 后）</div>'; return; }
-  let html=`<div class="meta-date">早报日期：${d.date}</div>`;
+  let html=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:1px">早报日期：${d.date}</div>`;
   if(d.lead&&d.lead.title){
     html+=`<div class="lead"><h2>${esc(d.lead.title)}</h2>${d.lead.leadParagraph?`<p>${esc(d.lead.leadParagraph)}</p>`:""}</div>`;
   }
